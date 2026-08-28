@@ -274,13 +274,163 @@ button:disabled{opacity:.42;cursor:not-allowed}
   .box h2{font-size:22px}
 }
 
+
+/* V3 手機單畫面模式 */
+.chatFab{
+  display:none;position:fixed;right:10px;bottom:10px;z-index:90;
+  padding:10px 13px;font-size:14px;border-radius:999px;
+  box-shadow:0 5px 18px #0008
+}
+.chatDrawer{
+  margin-top:8px;background:linear-gradient(180deg,#143425f8,#0d251af8);
+  border:1px solid var(--line);border-radius:16px;padding:10px
+}
+.chatDrawerHead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+
+@media(max-width:700px){
+  html,body{height:100%;overflow:hidden}
+  body{min-height:100dvh}
+  .wrap{
+    height:100dvh;max-height:100dvh;overflow:hidden;
+    padding:4px;display:flex;flex-direction:column
+  }
+
+  .top{
+    flex:0 0 auto;padding:5px 7px;border-radius:9px;position:static;
+    min-height:0
+  }
+  .top h1{font-size:16px;line-height:1.1}
+  .top .sub{display:none}
+  .netBadge{font-size:10px;padding:3px 6px}
+
+  #lobby{overflow:auto}
+  #gameArea{
+    flex:1;min-height:0;overflow:hidden;
+    display:flex;flex-direction:column
+  }
+  #gameArea.gameHidden{display:none}
+
+  .status{
+    flex:0 0 auto;margin:3px 0;padding:4px 6px;border-radius:9px;
+    min-height:30px
+  }
+  .turn{font-size:14px}
+  .scorebox{gap:3px}
+  .chip{font-size:9px;padding:2px 5px}
+
+  .table{
+    flex:1;min-height:0;
+    display:grid!important;
+    grid-template-columns:1fr 1fr 1fr;
+    grid-template-rows:52px minmax(0,1fr) 146px;
+    gap:4px
+  }
+
+  .cpu.top,.cpu.left,.cpu.right{
+    grid-row:1!important;grid-column:auto!important;
+    min-height:0;padding:4px 5px;border-radius:9px;overflow:hidden
+  }
+  .cpu.left{grid-column:1!important}
+  .cpu.top{grid-column:2!important}
+  .cpu.right{grid-column:3!important}
+
+  .cpu .name{
+    font-size:11px;margin:0;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis
+  }
+  .cpu .count,.cpu .coverStats{font-size:9px;line-height:1.25}
+  .cpu .backs{display:none}
+
+  .center{
+    grid-column:1/4!important;grid-row:2!important;
+    min-height:0;padding:4px 5px;border-radius:10px;
+    display:flex;flex-direction:column;overflow:hidden
+  }
+  .center>b{font-size:11px;line-height:1}
+
+  .board{
+    flex:1;min-height:0;
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:3px;margin-top:3px
+  }
+  .suitcol{
+    min-height:0;padding:2px;border-radius:7px;
+    display:flex;flex-direction:column;overflow:hidden
+  }
+  .suitname{font-size:12px;margin-bottom:1px;line-height:1.1}
+  .pile{
+    flex:1;min-height:0;justify-content:center;
+    gap:1px;overflow:hidden
+  }
+  .mini{
+    width:34px;height:18px;font-size:10px;padding:0 3px;
+    border-width:1px;border-radius:4px;box-shadow:none
+  }
+  .log{display:none}
+
+  .you{
+    grid-column:1/4!important;grid-row:3!important;
+    min-height:0;padding:5px;border-radius:10px;
+    display:flex;flex-direction:column;overflow:hidden
+  }
+  .you>div:first-child{
+    flex:0 0 auto;display:grid!important;
+    grid-template-columns:1fr 150px;gap:4px!important
+  }
+  .youName{font-size:13px}
+  .you .count{font-size:10px}
+  .you .coverStats{font-size:9px}
+  .actionPanel{width:auto!important;gap:4px}
+  .actionBtn{
+    min-width:0!important;font-size:13px!important;
+    padding:7px 5px!important;border-width:2px
+  }
+  .familyChat{display:none}
+
+  .hand{
+    flex:1;min-height:0;
+    justify-content:flex-start;overflow-x:auto;overflow-y:hidden;
+    flex-wrap:nowrap;gap:2px;padding:4px 1px 1px;
+    -webkit-overflow-scrolling:touch
+  }
+  .card{
+    flex:0 0 48px;width:48px;height:68px;
+    padding:3px;border-radius:7px;border-width:2px
+  }
+  .rank{font-size:17px}
+  .suit{font-size:19px;right:4px;bottom:3px}
+  .legend{display:none}
+
+  .chatFab{display:block}
+  .chatDrawer{
+    display:none;position:fixed;z-index:120;
+    left:7px;right:7px;bottom:7px;
+    margin:0;padding:9px;border-radius:14px;
+    max-height:72dvh;box-shadow:0 10px 35px #000c
+  }
+  .chatDrawer.open{display:block}
+  .chatMessages{height:36dvh;max-height:270px}
+  .chatComposer input{font-size:16px}
+  .voiceBtn{font-size:12px!important;padding:7px 9px!important}
+
+  .modal{padding:6px}
+  .modal .box{max-height:90dvh;overflow:auto;width:96%;padding:12px}
+}
+
+@media(max-width:380px){
+  .table{grid-template-rows:48px minmax(0,1fr) 136px}
+  .card{flex-basis:44px;width:44px;height:62px}
+  .mini{width:30px;height:17px;font-size:9px}
+  .you>div:first-child{grid-template-columns:1fr 132px}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <div>
-      <h1>🃏 排七 Online <span style="font-size:13px;color:#ffd166">V2</span></h1>
+      <h1>🃏 排七 Online <span style="font-size:13px;color:#ffd166">V3</span></h1>
       <div class="sub">自己輸入名字加入房間｜不足 4 人自動補高手 AI｜♦7 固定起手</div>
     </div>
     <div class="netBadge" id="netBadge">尚未連線</div>
@@ -357,16 +507,18 @@ button:disabled{opacity:.42;cursor:not-allowed}
       </div>
     </div>
 
-    <div class="chatPanel">
-      <div class="chatHeader">
+    <button id="chatFab" class="chatFab" type="button">💬 聊天</button>
+    <div class="chatDrawer" id="chatDrawer">
+      <div class="chatDrawerHead">
         <div>
           <b>💬 真人聊天室</b>
           <div class="voiceState" id="voiceState">語音尚未開啟</div>
         </div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button id="voiceBtn" class="secondary voiceBtn">🎙️ 開啟語音</button>
-          <button id="muteBtn" class="secondary voiceBtn" disabled>🔇 靜音</button>
-        </div>
+        <button id="closeChatBtn" class="secondary voiceBtn">✕</button>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
+        <button id="voiceBtn" class="secondary voiceBtn">🎙️ 開啟語音</button>
+        <button id="muteBtn" class="secondary voiceBtn" disabled>🔇 靜音</button>
       </div>
       <div class="voiceUsers" id="voiceUsers"></div>
       <div class="chatMessages" id="chatMessages"></div>
@@ -896,6 +1048,8 @@ $('sendChatBtn').onclick=sendChat;
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
 $('voiceBtn').onclick=enableVoice;
 $('muteBtn').onclick=toggleMute;
+$('chatFab').onclick=()=>$('chatDrawer').classList.add('open');
+$('closeChatBtn').onclick=()=>$('chatDrawer').classList.remove('open');
 renderLobby();
 })();
 </script>

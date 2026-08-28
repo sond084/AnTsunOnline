@@ -424,13 +424,23 @@ button:disabled{opacity:.42;cursor:not-allowed}
   .you>div:first-child{grid-template-columns:1fr 132px}
 }
 
+
+.chatFab{position:fixed}
+.chatUnread{
+  display:none;position:absolute;right:-4px;top:-6px;
+  min-width:20px;height:20px;padding:0 5px;border-radius:999px;
+  background:#ef5350;color:#fff;font-size:11px;font-weight:1000;
+  align-items:center;justify-content:center;border:2px solid #fff;
+}
+.chatUnread.show{display:flex}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <div>
-      <h1>🃏 排七 Online <span style="font-size:13px;color:#ffd166">V3</span></h1>
+      <h1>🃏 排七 Online <span style="font-size:13px;color:#ffd166">V4</span></h1>
       <div class="sub">自己輸入名字加入房間｜不足 4 人自動補高手 AI｜♦7 固定起手</div>
     </div>
     <div class="netBadge" id="netBadge">尚未連線</div>
@@ -507,7 +517,7 @@ button:disabled{opacity:.42;cursor:not-allowed}
       </div>
     </div>
 
-    <button id="chatFab" class="chatFab" type="button">💬 聊天</button>
+    <button id="chatFab" class="chatFab" type="button">💬 聊天<span id="chatUnread" class="chatUnread">0</span></button>
     <div class="chatDrawer" id="chatDrawer">
       <div class="chatDrawerHead">
         <div>
@@ -559,6 +569,7 @@ let peer=null,hostConn=null,conns=[],isHost=false,roomId='',myId='',mySeat=-1;
 let actionMode='play',selectedCard=null,aiTimer=null;
 let localStream=null,voiceEnabled=false,muted=false;
 const mediaCalls=new Map(),remoteAudios=new Map();
+let lastChatCount=0,unreadChats=0;
 
 function freshGame(){
  return {
@@ -609,6 +620,12 @@ function broadcast(){
  conns.forEach(sendState);
 }
 
+
+function normalizeName(name){return String(name||'').trim().toLocaleLowerCase('zh-Hant')}
+function nameExists(name){
+ const key=normalizeName(name);
+ return game.players.some(p=>normalizeName(p.name)===key);
+}
 function addHuman(name,id){
  const seat=game.players.length;
  game.players.push({id,name:name||'玩家',ai:false,seat});
@@ -617,7 +634,9 @@ function addHuman(name,id){
 function fillAI(){
  let n=1;
  while(game.players.length<MAX){
-   game.players.push({id:'ai_'+uid(),name:'高手AI '+n++,ai:true,seat:game.players.length});
+   let aiName;
+   do{aiName='高手AI '+n++}while(nameExists(aiName));
+   game.players.push({id:'ai_'+uid(),name:aiName,ai:true,seat:game.players.length});
  }
 }
 
@@ -643,7 +662,24 @@ function sendChat(){
 }
 function renderChat(){
  const box=$('chatMessages');if(!box)return;
- box.innerHTML=(game.chatMessages||[]).map(m=>
+ const msgs=game.chatMessages||[];
+ const drawerOpen=$('chatDrawer')?.classList.contains('open');
+ if(msgs.length>lastChatCount){
+   const incoming=msgs.slice(lastChatCount).filter(m=>m.seat!==mySeat).length;
+   if(incoming>0&&!drawerOpen){
+     unreadChats+=incoming;
+     const fab=$('chatFab');
+     if(fab){fab.animate([{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}],{duration:380})}
+     if(navigator.vibrate)navigator.vibrate(80);
+   }
+ }
+ lastChatCount=msgs.length;
+ const badge=$('chatUnread');
+ if(badge){
+   badge.textContent=unreadChats>99?'99+':String(unreadChats);
+   badge.classList.toggle('show',unreadChats>0);
+ }
+ box.innerHTML=msgs.map(m=>
    `<div class="chatMsg"><span class="who">${escapeHtml(m.name)}：</span>${escapeHtml(m.text)}</div>`
  ).join('');
  box.scrollTop=box.scrollHeight;
@@ -721,7 +757,8 @@ function createRoom(){
  roomId=rid();myId=uid();isHost=true;
  peer=new Peer('pai7-'+roomId);
  peer.on('open',()=>{
-   mySeat=addHuman($('nameInput').value.trim()||'房主',myId);
+   const hostName=$('nameInput').value.trim()||'房主';
+   mySeat=addHuman(hostName,myId);
    $('roomCode').textContent=roomId;$('roomInput').value=roomId;
    $('startBtn').style.display='block';$('netBadge').textContent='房主｜'+roomId;
    $('lobbyStatus').textContent='房間已建立，把房號傳給朋友。';renderLobby();
@@ -786,7 +823,9 @@ function broadcastLobby(){
 function handleHostData(conn,m){
  if(m.type==='hello'){
    if(game.started||game.players.length>=MAX){conn.send({type:'reject',reason:'房間已開始或已滿'});return}
-   const seat=addHuman(String(m.name||'玩家').slice(0,12),m.id);
+   const joinName=String(m.name||'玩家').trim().slice(0,12);
+   if(nameExists(joinName)){conn.send({type:'reject',reason:'這個名字已經有人使用，請換一個名字。'});return}
+   const seat=addHuman(joinName,m.id);
    conn.playerId=m.id;conn.seat=seat;
    conn.send({type:'welcome',seat,game:lobbyStateFor(seat)});broadcastLobby();
    if(voiceEnabled&&localStream)setTimeout(()=>callPeer(conn.peer),400);
@@ -1048,7 +1087,12 @@ $('sendChatBtn').onclick=sendChat;
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
 $('voiceBtn').onclick=enableVoice;
 $('muteBtn').onclick=toggleMute;
-$('chatFab').onclick=()=>$('chatDrawer').classList.add('open');
+$('chatFab').onclick=()=>{
+ unreadChats=0;
+ const badge=$('chatUnread');if(badge)badge.classList.remove('show');
+ $('chatDrawer').classList.add('open');
+ renderChat();
+};
 $('closeChatBtn').onclick=()=>$('chatDrawer').classList.remove('open');
 renderLobby();
 })();
